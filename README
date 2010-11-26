@@ -1,0 +1,10 @@
+This is an attempt to simulate a micro world with as many rules as possible.
+
+Living beings represented here are:
+
+- Vegetables - Live and reproduce.
+- Vegetarians - Move and eat vegetables
+- Carnivores - Move and eat vegetarians
+
+
+Simple toy application made using Processing
