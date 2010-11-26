@@ -1,0 +1,257 @@
+package application;
+
+import java.util.ArrayList;
+
+import processing.core.PApplet;
+import elements.Attractor;
+import elements.Carnivore;
+import elements.Obstacle;
+import elements.Vegetable;
+import elements.Vegetarian;
+import elements.abstracts.Element;
+import elements.abstracts.LivingBeing;
+import elements.abstracts.MovableLivingBeing;
+
+public class Manager {
+
+	private Vegetarian vegetarians[];
+	private Obstacle obstacles[];
+	private static PApplet app;
+	private Vegetable[] vegetables;
+	private Carnivore[] carnivores;
+	
+	private static  Manager instance = null;
+	
+
+	private Manager(PApplet app) {
+		vegetarians = new Vegetarian[0];
+		obstacles = new Obstacle[0];
+		vegetables = new Vegetable[0];
+		carnivores = new Carnivore[0];
+		this.app = app;
+		Manager.instance = this;
+	}
+	
+	public static Manager getInsManager(PApplet app){
+		if(instance != null)
+			return instance;
+		return new Manager(app);
+			
+	}
+	
+	public static Manager getInsManager(){		
+		return instance;
+			
+	}
+	
+	public static void restart(){
+		instance = null;		
+	}
+	
+	public static PApplet processing(){
+		return app;
+	}
+
+	public Attractor createAttractor(LivingBeing n) {
+		Attractor a = null;
+		while (true) {
+			int x = (int) app.random(n.center.x - (Emergence.THRESHOLD * 5), n.center.x
+					+ (Emergence.THRESHOLD * 5));
+			int y = (int) app.random(n.center.y - (Emergence.THRESHOLD * 5), n.center.y
+					+ (Emergence.THRESHOLD * 5));
+			if (!checkCollision(x, y, Emergence.VEGETARIAN_SIZE)) {
+				a = new Attractor(x, y);
+				return a;
+			}
+		}
+
+	}
+
+	public Vegetarian createVegetarian() {
+		Vegetarian n = null;
+		while (true) {
+			int x = (int) app.random(Emergence.WORLD_WIDTH);
+			int y = (int) app.random(app.height);
+			if (!checkCollision(x, y, Emergence.VEGETARIAN_SIZE)) {
+				n = new Vegetarian(x, y);
+				vegetarians = (Vegetarian[]) PApplet.expand(vegetarians, vegetarians.length + 1);
+				vegetarians[vegetarians.length - 1] = n;
+				n.a = createAttractors(n);
+				return n;
+			}
+
+		}
+
+	}
+	
+	public Carnivore createCarnivore() {
+		Carnivore n = null;
+		while (true) {
+			int x = (int) app.random(Emergence.WORLD_WIDTH);
+			int y = (int) app.random(app.height);
+			if (!checkCollision(x, y, Emergence.CARNIVORE_SIZE)) {
+				n = new Carnivore(x, y);
+				carnivores = (Carnivore[]) PApplet.expand(carnivores, carnivores.length + 1);
+				carnivores[carnivores.length - 1] = n;
+				n.a = createAttractors(n);
+				return n;
+			}
+
+		}
+
+	}
+	
+	public Obstacle createObstacle() {
+
+		return (Obstacle)createThing(new Obstacle(0,0));
+
+	}
+	
+	public Vegetable createVegetable() {
+		
+		return (Vegetable)createThing(new Vegetable(0,0));
+	}
+	
+	private Element createThing(Element e){
+		Element o = null;
+		while (true) {
+			int x = (int) app.random(Emergence.WORLD_WIDTH);
+			int y = (int) app.random(app.height);
+			if (!checkCollision(x, y, e.getSize())) {
+				if(e instanceof Vegetable){
+					o = new Vegetable( x, y);
+					vegetables = (Vegetable[]) PApplet.expand(vegetables, vegetables.length + 1);
+					vegetables[vegetables.length - 1] = (Vegetable)o;
+				}else if(e instanceof Obstacle){
+					o = new Obstacle(x, y);
+					obstacles = (Obstacle[]) PApplet.expand(obstacles, obstacles.length + 1);
+					obstacles[obstacles.length - 1] = (Obstacle)o;
+				}
+					
+				
+				return o;
+			}
+
+		}
+	}
+	
+
+	public void removeLivingBeing(LivingBeing being) {
+		ArrayList<LivingBeing> ns = new ArrayList<LivingBeing>();
+		if(being instanceof Carnivore){
+			for (int i = 0; i < carnivores.length; i++) {
+				if(!carnivores[i].equals(being))
+					ns.add(carnivores[i]);
+			}
+			carnivores = new Carnivore[ns.size()];
+			for (int i = 0; i < carnivores.length; i++) {
+				carnivores[i] = (Carnivore)ns.get(i);
+			}
+		}else if(being instanceof Vegetarian){
+			for (int i = 0; i < vegetarians.length; i++) {
+				if(!vegetarians[i].equals(being))
+					ns.add(vegetarians[i]);
+			}
+			vegetarians = new Vegetarian[ns.size()];
+			for (int i = 0; i < vegetarians.length; i++) {
+				vegetarians[i] = (Vegetarian)ns.get(i);
+			}
+		}else {
+			for (int i = 0; i < vegetables.length; i++) {
+				if(!vegetables[i].equals(being))
+					ns.add(vegetables[i]);		
+					
+			}
+			
+			vegetables = new Vegetable[ns.size()];
+			for (int i = 0; i < vegetables.length; i++) {
+				vegetables[i] = (Vegetable)ns.get(i);
+			}
+		}
+		
+	}
+	
+
+	
+	public Vegetarian[] getvegetarians(){
+		return vegetarians;
+	}
+	
+	public Vegetable[] getVegetables(){
+		return vegetables;
+	}
+	
+	public Carnivore[] getCarnivores(){
+		return carnivores;
+	}
+
+
+	public Attractor[] createAttractors(MovableLivingBeing n) {
+		Attractor[] as = new Attractor[n.a.length];
+		for (int i = 0; i < n.a.length; i++) {
+			as[i] = createAttractor(n);
+		}
+		return as;
+	}
+	
+	
+	public void consumeFood(MovableLivingBeing eater, LivingBeing food){
+		removeLivingBeing(food);
+		eater.eat();
+		createAttractors(eater);
+		if(food instanceof Vegetable)			 
+			createVegetable();	
+		
+	}
+
+	
+
+	public boolean checkCollision(int x, int y, int s) {
+
+		if (checkCollisionInList(x, y, s + Emergence.THRESHOLD, vegetarians))
+			return true;
+		if (checkCollisionInList(x, y, s + Emergence.THRESHOLD, carnivores))
+			return true;
+
+		// verifica com os atratores dos outros vegetarianos
+		for (int i = 0; i < vegetarians.length; i++) {
+			if (vegetarians[i].a[0] != null)
+				if (checkCollisionInList(x, y, s + Emergence.THRESHOLD, vegetarians[i].a))
+					return true;
+		}
+		// verifica com os atratores dos outros carnivoros
+		for (int i = 0; i < carnivores.length; i++) {
+			if (carnivores[i].a[0] != null)
+				if (checkCollisionInList(x, y, s + Emergence.THRESHOLD, carnivores[i].a))
+					return true;
+		}
+		
+		
+		
+		//verifica com os obstaculos
+		if (checkCollisionInList(x, y, s + Emergence.THRESHOLD, obstacles))
+			return true;
+
+		// Detecta colisão com os limites do ambiente
+		if (!(x > s && x < Emergence.WORLD_WIDTH - s && y > s && y < app.height - s))
+			return true;
+		return false;
+	}
+
+	private boolean checkCollisionInList(int x, int y, int s, Element[] l) {
+		for (int i = 0; i < l.length; i++) {
+			// se for eu...ignora
+			if (x == l[i].x && y == l[i].y)
+				break;
+			if (((x >= l[i].x && x <= l[i].x + l[i].side) || (x + s >= l[i].x && x + s <= l[i].x
+					+ l[i].side))
+					&& ((y >= l[i].y && y <= l[i].y + l[i].side) || (y + s >= l[i].y && y
+							+ s <= l[i].y + l[i].side)))
+				return true;
+		}
+		return false;
+	}
+
+	
+	
+}

@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/projects/!svn/ver/22/trunk/processing/Emergence/src/elements/abstracts
+END
+MovableLivingBeing.java
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/projects/!svn/ver/27/trunk/processing/Emergence/src/elements/abstracts/MovableLivingBeing.java
+END
+Element.java
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/projects/!svn/ver/22/trunk/processing/Emergence/src/elements/abstracts/Element.java
+END
+IDrawable.java
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/projects/!svn/ver/16/trunk/processing/Emergence/src/elements/abstracts/IDrawable.java
+END
+LivingBeing.java
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/projects/!svn/ver/27/trunk/processing/Emergence/src/elements/abstracts/LivingBeing.java
+END
+IMovable.java
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/projects/!svn/ver/16/trunk/processing/Emergence/src/elements/abstracts/IMovable.java
+END
